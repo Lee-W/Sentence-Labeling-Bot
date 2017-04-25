@@ -1,0 +1,2 @@
+TOKEN = '331392394:AAHf7BWn8y4NYN8rTzTfPguceieLqVZZoYo'
+SECRET_KEY = 'B2r(DQOu#%jd7H!bsl>!Eoihe,*tN7M}y27kRNR>~SB~$64K2L'
