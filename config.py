@@ -9,6 +9,10 @@ class Config:
     SQLALCHEMY_COMMINT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    @staticmethod
+    def init_app(app):
+        pass
+
 
 class DevelopmentConfig(Config):
     try:
