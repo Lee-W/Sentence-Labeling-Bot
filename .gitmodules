@@ -1,0 +1,3 @@
+[submodule "labelingbot/main/botfsm"]
+	path = labelingbot/main/botfsm
+	url = https://github.com/Lee-W/botfsm
