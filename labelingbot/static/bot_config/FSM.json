@@ -1,7 +1,50 @@
 {
     "states": [
-        "user"
+        "user",
+        "ask_usage",
+        "wait_user_alternative",
+        "wait_user_binary_response",
+        "wait_user_similarity_score"
     ],
     "transitions": [
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "ask_usage",
+            "conditions": "is_asking_usage"
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "wait_user_alternative",
+            "conditions": "is_anwsering_alternative"
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "wait_user_binary_response",
+            "conditions": "is_anwsering_binary"
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "wait_user_similarity_score",
+            "conditions": "is_anwsering_score"
+        },
+
+        {
+            "trigger": "user_finish_ans",
+            "source": [
+                "wait_user_alternative",
+                "wait_user_binary_response",
+                "wait_user_similarity_score"
+            ],
+            "dest": "user"
+        },
+        {
+            "trigger": "bot_finish_ans",
+            "source": "ask_usage",
+            "dest": "user"
+        }
     ]
 }
