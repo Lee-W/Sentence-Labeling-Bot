@@ -1,3 +1,6 @@
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from . import db
 
 
@@ -29,3 +32,21 @@ class SentenceBinary(db.Model):
     sentence_id = db.Column(db.Integer, db.ForeignKey('sentence.id'))
     paraphrase_id = db.Column(db.Integer, db.ForeignKey('paraphrase.id'))
     is_similar = db.Column(db.Boolean)
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
+
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_passowrd(self, password):
+        return check_password_hash(self.password, password)

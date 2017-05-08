@@ -33,3 +33,7 @@ def init_machine():
     )
 
 init_machine()
+
+@main.route('/', methods=['GET', 'POST'])
+def index():
+    return 'ok'

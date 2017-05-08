@@ -1,6 +1,7 @@
 from io import BytesIO
 
 from flask import send_file
+from flask_login import login_required
 from pygraphviz.agraph import AGraph
 from eralchemy.main import all_to_intermediary, _intermediary_to_dot
 
@@ -10,6 +11,7 @@ from . import system_design
 
 
 @system_design.route('/er-diagram', methods=['GET'])
+@login_required
 def show_er_diagram():
     er_diagram = BytesIO()
     er_diagram.name = 'er_diagram'
@@ -24,6 +26,7 @@ def show_er_diagram():
 
 
 @system_design.route('/fsm', methods=['GET'])
+@login_required
 def show_fsm():
     fsm_graph = BytesIO()
     machine.draw_graph(fsm_graph, prog='dot')
