@@ -27,6 +27,8 @@ def create_app(config_name):
     db.init_app(app)
 
     from .main import main as main_blueprint
+    from .systemdesign import system_design as system_design_blurprint
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(system_design_blurprint, url_prefix='/system-design')
 
     return app

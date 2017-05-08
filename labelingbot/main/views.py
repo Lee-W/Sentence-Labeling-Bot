@@ -1,10 +1,11 @@
 import os
-from io import BytesIO
 
 import ujson
-from flask import send_file
 
-from .. import APP_STATIC_PATH, APP_TEMPLATE_PATH, bot
+from .. import (
+    APP_STATIC_PATH, APP_TEMPLATE_PATH,
+    bot
+)
 from . import main
 from .labelingfsm import LabelingMachine
 
@@ -32,11 +33,3 @@ def init_machine():
     )
 
 init_machine()
-
-
-@main.route('/show-fsm', methods=['GET'])
-def show_fsm():
-    fsm_graph = BytesIO()
-    machine.draw_graph(fsm_graph, prog='dot')
-    fsm_graph.seek(0)
-    return send_file(fsm_graph, attachment_filename='fsm.png', mimetype='image/png')
