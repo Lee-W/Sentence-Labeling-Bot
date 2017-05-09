@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from . import db
+from . import db, login_manager
 
 
 class Sentence(db.Model):
@@ -49,4 +49,9 @@ class User(db.Model, UserMixin):
         self.password_hash = generate_password_hash(password)
 
     def verify_passowrd(self, password):
-        return check_password_hash(self.password, password)
+        return check_password_hash(self.password_hash, password)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))

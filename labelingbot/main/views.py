@@ -1,6 +1,7 @@
 import os
 
 import ujson
+from flask import render_template
 
 from .. import (
     APP_STATIC_PATH, APP_TEMPLATE_PATH,
@@ -34,6 +35,7 @@ def init_machine():
 
 init_machine()
 
+
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    return 'ok'
+    return render_template('index.html')
