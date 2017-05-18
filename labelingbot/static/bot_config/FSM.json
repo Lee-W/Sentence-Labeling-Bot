@@ -33,18 +33,38 @@
         },
 
         {
-            "trigger": "user_finish_ans",
+            "trigger": "advance",
             "source": [
                 "wait_user_alternative",
                 "wait_user_binary_response",
                 "wait_user_similarity_score"
             ],
-            "dest": "user"
+            "dest": "user",
+            "conditions": "is_quit"
         },
         {
             "trigger": "bot_finish_ans",
             "source": "ask_usage",
             "dest": "user"
+        },
+
+        {
+            "trigger": "advance",
+            "source": "wait_user_alternative",
+            "dest": "wait_user_alternative",
+            "conditions": "is_answering"
+        },
+        {
+            "trigger": "advance",
+            "source": "wait_user_binary_response",
+            "dest": "wait_user_binary_response",
+            "conditions": "is_answering"
+        },
+        {
+            "trigger": "advance",
+            "source": "wait_user_similarity_score",
+            "dest": "wait_user_similarity_score",
+            "conditions": "is_answering"
         }
     ]
 }
