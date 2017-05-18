@@ -16,6 +16,7 @@ class Config:
 
 
 class DevelopmentConfig(Config):
+    DEBUG = True
     try:
         from config_secret import BOT_API_TOKEN, SECRET_KEY
     except ModuleNotFoundError as error:
@@ -28,6 +29,7 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
+    TESTING = True
     try:
         from config_secret import BOT_API_TOKEN, SECRET_KEY
     except ModuleNotFoundError as error:
