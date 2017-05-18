@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 config_secret.py
 data.sqlite
+data-test.sqlite
