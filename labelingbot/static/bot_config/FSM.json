@@ -40,7 +40,7 @@
                 "wait_user_similarity_score"
             ],
             "dest": "user",
-            "conditions": "is_quit"
+            "conditions": "is_quitting"
         },
         {
             "trigger": "bot_finish_ans",
