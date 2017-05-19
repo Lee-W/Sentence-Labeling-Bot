@@ -1,7 +1,8 @@
 import os
 
 import ujson
-from flask import render_template
+from flask import render_template, request
+import telegram
 
 from .. import (
     APP_STATIC_PATH, APP_TEMPLATE_PATH,
@@ -16,6 +17,7 @@ BOT_TEMPLATE_PATH = os.path.join(APP_TEMPLATE_PATH, 'bot_templates')
 
 machine = None
 
+bot.set_webhook()
 
 def init_machine():
     global machine
@@ -39,3 +41,10 @@ init_machine()
 @main.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
+
+
+@main.route('/reply', methods=['POST'])
+def reply():
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    machine.advance(update)
+    return 'ok'
