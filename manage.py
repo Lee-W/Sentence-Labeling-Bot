@@ -7,7 +7,7 @@ from labelingbot import create_app, db
 from labelingbot.models import User
 
 
-app = create_app(os.getenv('FLASKY_CONFIG') or 'default')
+app = create_app(os.getenv('LABELING_BOT_CONFIG') or 'default')
 manager = Manager(app)
 migrate = Migrate(app, db)
 
