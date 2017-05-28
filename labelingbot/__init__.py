@@ -11,7 +11,7 @@ from config import config
 
 APP_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 APP_STATIC_PATH = os.path.join(APP_ROOT_PATH, 'static')
-APP_TEMPLATE_PATH = os.path.join(APP_ROOT_PATH, 'template')
+APP_TEMPLATE_PATH = os.path.join(APP_ROOT_PATH, 'templates')
 
 bot = None
 db = SQLAlchemy()
