@@ -52,6 +52,14 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+class TelegramUser(db.Model):
+    __tablename__ = 'telegram_user'
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(64))
+    last_name = db.Column(db.String(64))
+    username = db.Column(db.String(64))
+    type = db.String(db.String(64))
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
