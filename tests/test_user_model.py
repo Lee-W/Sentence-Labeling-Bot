@@ -9,7 +9,8 @@ def user(session):
 
     session.add(user)
     session.commit()
-    return user
+
+    yield user
 
 
 def test_verify_password_success(user):

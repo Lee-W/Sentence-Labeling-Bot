@@ -7,16 +7,13 @@ from labelingbot import db as _db
 @pytest.fixture(scope='session')
 def app():
     app = create_app('testing')
-    app_context = app.app_context()
-    app_context.push()
 
-    yield app
-
-    app_context.pop()
+    with app.app_context():
+        yield app
 
 
 @pytest.fixture(scope='session')
-def db(app, request):
+def db(app):
     _db.app = app
     _db.create_all()
 
@@ -26,27 +23,16 @@ def db(app, request):
 
 
 @pytest.fixture(scope='function')
-def session(db, request):
-    connection = db.engine.connect()
-    transaction = connection.begin()
+def session(db):
+    db.session.begin(subtransactions=True)
 
-    session = db.create_scoped_session(
-        options={
-            "bind": connection,
-            "binds": {}
-        }
-    )
+    yield db.session
 
-    db.session = session
-
-    yield session
-
-    transaction.rollback()
-    connection.close()
-    session.remove()
+    db.session.rollback()
+    db.session.remove()
 
 
 @pytest.fixture(scope='session')
 def client(app):
-    client = app.test_client(use_cookies=True)
-    return client
+    _client = app.test_client(use_cookies=True)
+    return _client
