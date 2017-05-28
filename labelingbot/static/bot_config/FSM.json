@@ -17,19 +17,19 @@
             "trigger": "advance",
             "source": "user",
             "dest": "wait_user_alternative",
-            "conditions": "is_anwsering_alternative"
+            "conditions": "is_answering_alternative"
         },
         {
             "trigger": "advance",
             "source": "user",
             "dest": "wait_user_binary_response",
-            "conditions": "is_anwsering_binary"
+            "conditions": "is_answering_binary"
         },
         {
             "trigger": "advance",
             "source": "user",
             "dest": "wait_user_similarity_score",
-            "conditions": "is_anwsering_score"
+            "conditions": "is_answering_score"
         },
 
         {
