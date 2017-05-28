@@ -3,8 +3,11 @@
         "user",
         "ask_usage",
         "wait_user_alternative",
+        "receive_user_alternative",
         "wait_user_binary_response",
-        "wait_user_similarity_score"
+        "receive_user_binary_response",
+        "wait_user_similarity_score",
+        "receive_user_similarity_score"
     ],
     "transitions": [
         {
@@ -13,6 +16,7 @@
             "dest": "ask_usage",
             "conditions": "is_asking_usage"
         },
+
         {
             "trigger": "advance",
             "source": "user",
@@ -21,50 +25,63 @@
         },
         {
             "trigger": "advance",
+            "source": "wait_user_alternative",
+            "dest": "receive_user_alternative"
+        },
+        {
+            "trigger": "continue_answering",
+            "source": "receive_user_alternative",
+            "dest": "wait_user_alternative",
+        },
+
+        {
+            "trigger": "advance",
             "source": "user",
             "dest": "wait_user_binary_response",
             "conditions": "is_answering_binary"
         },
         {
             "trigger": "advance",
-            "source": "user",
-            "dest": "wait_user_similarity_score",
-            "conditions": "is_answering_score"
+            "source": "wait_user_binary_response",
+            "dest": "receive_user_binary_response"
+        },
+        {
+            "trigger": "continue_answering",
+            "source": "receive_user_binary_response",
+            "dest": "wait_user_binary_response",
         },
 
         {
             "trigger": "advance",
+            "source": "user",
+            "dest": "wait_user_similarity_score",
+            "conditions": "is_answering_score"
+        },
+        {
+            "trigger": "advance",
+            "source": "wait_user_similarity_score",
+            "dest": "receive_user_similarity_score"
+        },
+        {
+            "trigger": "continue_answering",
+            "source": "receive_user_similarity_score",
+            "dest": "wait_user_similarity_score"
+        },
+
+
+        {
+            "trigger": "quit_answering",
             "source": [
-                "wait_user_alternative",
-                "wait_user_binary_response",
-                "wait_user_similarity_score"
+                "receive_user_alternative",
+                "receive_user_binary_response",
+                "receive_user_similarity_score"
             ],
-            "dest": "user",
-            "conditions": "is_quitting"
+            "dest": "user"
         },
         {
             "trigger": "bot_finish_ans",
             "source": "ask_usage",
             "dest": "user"
-        },
-
-        {
-            "trigger": "advance",
-            "source": "wait_user_alternative",
-            "dest": "wait_user_alternative",
-            "conditions": "is_answering"
-        },
-        {
-            "trigger": "advance",
-            "source": "wait_user_binary_response",
-            "dest": "wait_user_binary_response",
-            "conditions": "is_answering"
-        },
-        {
-            "trigger": "advance",
-            "source": "wait_user_similarity_score",
-            "dest": "wait_user_similarity_score",
-            "conditions": "is_answering"
         }
     ]
 }
