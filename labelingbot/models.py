@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -16,6 +18,8 @@ class Paraphrase(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String)
     sentence_id = db.Column(db.Integer, db.ForeignKey('sentence.id'))
+    created_by = db.Column(db.Integer, db.ForeignKey('telegram_user.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
 class SentenceSimilairty(db.Model):
@@ -24,6 +28,8 @@ class SentenceSimilairty(db.Model):
     sentence_id = db.Column(db.Integer, db.ForeignKey('sentence.id'))
     paraphrase_id = db.Column(db.Integer, db.ForeignKey('paraphrase.id'))
     score = db.Column(db.Integer)
+    created_by = db.Column(db.Integer, db.ForeignKey('telegram_user.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
 class SentenceBinary(db.Model):
@@ -32,6 +38,8 @@ class SentenceBinary(db.Model):
     sentence_id = db.Column(db.Integer, db.ForeignKey('sentence.id'))
     paraphrase_id = db.Column(db.Integer, db.ForeignKey('paraphrase.id'))
     is_similar = db.Column(db.Boolean)
+    created_by = db.Column(db.Integer, db.ForeignKey('telegram_user.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
 class User(db.Model, UserMixin):
@@ -59,6 +67,7 @@ class TelegramUser(db.Model):
     last_name = db.Column(db.String(64))
     username = db.Column(db.String(64))
     type = db.String(db.String(64))
+
 
 @login_manager.user_loader
 def load_user(user_id):
