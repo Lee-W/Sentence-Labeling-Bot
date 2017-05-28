@@ -1,7 +1,7 @@
 import os
 
 import ujson
-from flask import render_template, request
+from flask import render_template, request, current_app
 import telegram
 
 from .. import (
@@ -17,7 +17,8 @@ BOT_TEMPLATE_PATH = os.path.join(APP_TEMPLATE_PATH, 'bot_templates')
 
 machine = None
 
-bot.set_webhook()
+bot.set_webhook(current_app.config['WEB_HOOK_URI'])
+
 
 def init_machine():
     global machine
