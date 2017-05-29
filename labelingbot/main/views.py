@@ -17,7 +17,7 @@ BOT_TEMPLATE_PATH = os.path.join(APP_TEMPLATE_PATH, 'bot_templates')
 
 machine = None
 
-bot.set_webhook(current_app.config['WEB_HOOK_URI'])
+bot.set_webhook(current_app.config['WEB_HOOK_URL'])
 
 
 def init_machine():
