@@ -32,6 +32,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     bot = telegram.Bot(config[config_name].BOT_API_TOKEN)
+    bot.set_webhook(config[config_name].WEB_HOOK_URL)
 
     db.init_app(app)
     bootstarp.init_app(app)

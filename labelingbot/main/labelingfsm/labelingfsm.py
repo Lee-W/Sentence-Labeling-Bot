@@ -1,4 +1,5 @@
 from flask_sqlalchemy import sqlalchemy
+from telegram import ParseMode
 
 from ... import db
 from ...models import (
@@ -115,7 +116,8 @@ class LabelingMachine(BotGraphMachine):
                     'sentence': sentence,
                     'paraphrase': paraphrase
                 }
-            )
+            ),
+            parse_mode=ParseMode.MARKDOWN
         )
 
     def on_enter_receive_user_binary_response(self, event):
