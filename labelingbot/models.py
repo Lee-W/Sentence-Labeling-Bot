@@ -12,6 +12,10 @@ class Sentence(db.Model):
     short_name = db.Column(db.String)
     content = db.Column(db.String)
 
+    similarities = db.relation('SentenceSimilairty', backref='sentence', lazy='dynamic')
+    paraphrases = db.relation('Paraphrase', backref='sentence', lazy='dynamic')
+    binary_answers = db.relation('SentenceBinary', backref='sentence', lazy='dynamic')
+
 
 class Paraphrase(db.Model):
     __tablename__ = 'paraphrase'
@@ -20,6 +24,9 @@ class Paraphrase(db.Model):
     sentence_id = db.Column(db.Integer, db.ForeignKey('sentence.id'))
     created_by = db.Column(db.Integer, db.ForeignKey('telegram_user.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    similarities = db.relation( 'SentenceSimilairty', backref='paraphrase', lazy='dynamic')
+    binary_answers = db.relation('SentenceBinary', backref='paraphrase', lazy='dynamic')
 
 
 class SentenceSimilairty(db.Model):
@@ -67,6 +74,10 @@ class TelegramUser(db.Model):
     last_name = db.Column(db.String(64))
     username = db.Column(db.String(64))
     type = db.String(db.String(64))
+
+    paraphrase = db.relation('Paraphrase', backref='telegram_user', lazy='dynamic')
+    sentence_similarity = db.relation('SentenceSimilairty', backref='telegram_user', lazy='dynamic')
+    sentence_binary = db.relation('SentenceBinary', backref='telegram_user', lazy='dynamic')
 
 
 @login_manager.user_loader

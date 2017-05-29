@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ super() }} - Sentence List
+{% endblock %}
+
+{% block page_content %}
+  <ul class="list-group">
+    {% for sentence in sentences %}
+      <li class="list-group-item">
+        <a href="/panel/sentence/{{ sentence.id }}">
+          {{ sentence.content }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

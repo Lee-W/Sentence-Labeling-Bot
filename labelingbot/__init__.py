@@ -41,9 +41,11 @@ def create_app(config_name):
 
     from .main import main as main_blueprint
     from .auth import auth as auth_blueprint
-    from .systemdesign import system_design as system_design_blurprint
+    from .systemdesign import system_design as system_design_blueprint
+    from .sentence_panel import sentence_panel as sentence_panel_blueprint
     app.register_blueprint(main_blueprint)
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
-    app.register_blueprint(system_design_blurprint, url_prefix='/system-design')
+    app.register_blueprint(system_design_blueprint, url_prefix='/system-design')
+    app.register_blueprint(sentence_panel_blueprint, url_prefix='/panel')
 
     return app

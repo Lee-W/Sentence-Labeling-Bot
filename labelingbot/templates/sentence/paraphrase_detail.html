@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ super() }} - Sentence
+{% endblock %}
+
+{% block page_content %}
+  <h3><span class="label label-primary">Original Sentence:</span> {{ paraphrase.sentence.content }}</h3>
+  <h3><span class="label label-primary">Paraphrase:</span> {{ paraphrase.content }}</h3>
+
+  <hr />
+
+  <h2>Binary Answer</h2>
+  <ul class="list-group">
+    {% for sentence_binary in paraphrase.binary_answers %}
+      <li class="list-group-item">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-default">Is Similiar:</span> {{ sentence_binary.is_similar }}
+          </li>
+          <li class="list-group-item">
+            <span class="label label-default">Created By:</span>
+            {% if sentence_binary.telegram_user.username %}
+              {{ sentence_binary.telegram_user.username }}
+            {% else %}
+              {{ sentence_binary.telegram_user.first_name }} {{ sentence_binary.telegram_user.last_name }}
+            {% endif %}
+          </li>
+          <li class="list-group-item">
+            <span class="label label-default">Created At:</span> {{ sentence_binary.created_at }}
+          </li>
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+  <hr />
+
+  <h2>Similarity</h2>
+  <ul class="list-group">
+    {% for similarity in paraphrase.similarities %}
+      <li class="list-group-item">
+        <ul class="list-group">
+          <li class="list-group-item">
+            <span class="label label-default">Score:</span> {{ similarity.is_similar }}
+          </li>
+          <li class="list-group-item">
+            <span class="label label-default">Created By:</span>
+            {% if similarity.telegram_user.username %}
+              {{ similarity.telegram_user.username }}
+            {% else %}
+              {{ similarity.telegram_user.first_name }} {{ similarity.telegram_user.last_name }}
+            {% endif %}
+          </li>
+          <li class="list-group-item">
+            <span class="label label-default">Created At:</span> {{ similarity.created_at }}
+          </li>
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
