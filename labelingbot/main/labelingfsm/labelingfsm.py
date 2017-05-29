@@ -1,5 +1,5 @@
 from flask_sqlalchemy import sqlalchemy
-from telegram import ParseMode
+from telegram import ParseMode, KeyboardButton, ReplyKeyboardMarkup
 
 from ... import db
 from ...models import (
@@ -109,6 +109,11 @@ class LabelingMachine(BotGraphMachine):
         db.session.add(sentence_binary)
         db.session.commit()
 
+        custom_keyboard = [
+            [KeyboardButton(text="Yes"), KeyboardButton(text="No")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+
         event.message.reply_text(
             self.render_text(
                 'ask_binary.j2',
@@ -117,7 +122,8 @@ class LabelingMachine(BotGraphMachine):
                     'paraphrase': paraphrase
                 }
             ),
-            parse_mode=ParseMode.MARKDOWN
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=reply_markup
         )
 
     def on_enter_receive_user_binary_response(self, event):
@@ -152,6 +158,11 @@ class LabelingMachine(BotGraphMachine):
         db.session.add(sentence_similarity)
         db.session.commit()
 
+        custom_keyboard = [
+            [KeyboardButton(text=str(num)) for num in range(1, 6)]
+        ]
+        reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+
         event.message.reply_text(
             self.render_text(
                 'ask_similarity.j2',
@@ -159,7 +170,9 @@ class LabelingMachine(BotGraphMachine):
                     'sentence': sentence,
                     'paraphrase': paraphrase
                 }
-            )
+            ),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=reply_markup
         )
 
     def on_enter_receive_user_similarity_score(self, event):
