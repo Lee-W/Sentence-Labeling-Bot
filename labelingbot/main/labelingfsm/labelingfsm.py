@@ -1,5 +1,9 @@
+import ujson
+from copy import deepcopy
 from flask_sqlalchemy import sqlalchemy
-from telegram import ParseMode, KeyboardButton, ReplyKeyboardMarkup
+from telegram import (
+    ParseMode, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+)
 
 from ... import db
 from ...models import (
@@ -7,25 +11,36 @@ from ...models import (
     TelegramUser
 )
 from .botfsm import BotGraphMachine
+from .botfsm.mixins import TelegramBotUpdateConditionMixin
 
 
-class LabelingMachine(BotGraphMachine):
+
+
+class LabelingMachine(BotGraphMachine, TelegramBotUpdateConditionMixin):
     # Conditions
     def is_asking_usage(self, event):
         text = event.message.text
-        return 'help' in text
+        return text in ('/help', '/usage', '/start')
 
-    def is_answering_alternative(self, event):
+    def is_asking_for_alternavtive_q(self, event):
         text = event.message.text
         return '1' in text
 
-    def is_answering_binary(self, event):
+    def is_asking_for_binary_q(self, event):
         text = event.message.text
         return '2' in text
 
-    def is_answering_score(self, event):
+    def is_asking_for_similarity_q(self, event):
         text = event.message.text
         return '3' in text
+
+    def is_answering_binary_q(self, event):
+        callback_data = ujson.loads(event.callback_query.data)
+        return callback_data['type'] == 'binary'
+
+    def is_answering_similarity_q(self, event):
+        callback_data = ujson.loads(event.callback_query.data)
+        return callback_data['type'] == 'similarity'
 
     def is_answering(self, event):
         text = event.message.text
@@ -33,23 +48,37 @@ class LabelingMachine(BotGraphMachine):
 
     def is_quitting(self, event):
         text = event.message.text
-        return text == 'quit'
+        return text in ('/quit')
 
     # Helper Functions
     @staticmethod
-    def get_or_create_telegramuser(event):
-        chat_id = event.message.chat_id
+    def get_or_create_telegramuser(from_user):
+        user_id = from_user.id
         telegram_user = TelegramUser.query.filter_by(
-            id=chat_id
+            id=user_id
         ).first()
         if not telegram_user:
             telegram_user = TelegramUser(
-                **event.message.from_user.to_dict()
+                **from_user.to_dict()
             )
             db.session.add(telegram_user)
             db.session.commit()
 
         return telegram_user
+
+    @staticmethod
+    def get_message_or_calbcak_query_message(event):
+        if event.message:
+            return event.message
+        elif event.callback_query.message:
+            return event.callback_query.message
+
+
+    def send_thank_you_message(self, event):
+        message = self.get_message_or_calbcak_query_message(event)
+        message.reply_text(
+            text=self.render_text('thanks.j2')
+        )
 
     # Operations
     def on_enter_ask_usage(self, event):
@@ -59,7 +88,7 @@ class LabelingMachine(BotGraphMachine):
         self.bot_finish_ans()
 
     def on_enter_wait_user_alternative(self, event):
-        telegram_user = self.get_or_create_telegramuser(event)
+        telegram_user = self.get_or_create_telegramuser(event.message.from_user)
 
         sentence = Sentence.query.order_by(sqlalchemy.func.random()).first()
         paraphrase = Paraphrase(
@@ -79,8 +108,8 @@ class LabelingMachine(BotGraphMachine):
 
     def on_enter_receive_user_alternative(self, event):
         if self.is_answering(event):
-            chat_id = event.message.chat_id
-            telegram_user = TelegramUser.query.filter_by(id=chat_id).first()
+            user_id = event.message.from_user.id
+            telegram_user = TelegramUser.query.filter_by(id=user_id).first()
             paraphrase = (
                 Paraphrase.query
                           .filter_by(created_by=telegram_user.id)
@@ -96,25 +125,27 @@ class LabelingMachine(BotGraphMachine):
             self.quit_answering(event)
 
     def on_enter_wait_user_binary_response(self, event):
-        telegram_user = self.get_or_create_telegramuser(event)
-
         sentence = Sentence.query.order_by(sqlalchemy.func.random()).first()
         paraphrase = Paraphrase.query.order_by(sqlalchemy.func.random()).first()
 
-        sentence_binary = SentenceBinary(
-            paraphrase_id=paraphrase.id,
-            sentence_id=sentence.id,
-            created_by=telegram_user.id
-        )
-        db.session.add(sentence_binary)
-        db.session.commit()
+        def create_callback_button(ans):
+            return ujson.dumps(
+                {
+                    'type': 'binary',
+                    'sid': sentence.id,
+                    'pid': paraphrase.id,
+                    'ans': ans,
+                }
+            )
 
-        custom_keyboard = [
-            [KeyboardButton(text="Yes"), KeyboardButton(text="No")]
+        is_similar_keyboard = [
+            [InlineKeyboardButton(text='Yes', callback_data=create_callback_button(True)),
+             InlineKeyboardButton(text='No', callback_data=create_callback_button(False))]
         ]
-        reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+        reply_markup = InlineKeyboardMarkup(is_similar_keyboard)
 
-        event.message.reply_text(
+        message = self.get_message_or_calbcak_query_message(event)
+        message.reply_text(
             self.render_text(
                 'ask_binary.j2',
                 {
@@ -125,45 +156,48 @@ class LabelingMachine(BotGraphMachine):
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup
         )
+        self.send_thank_you_message(event)
+        self.bot_finish_ans()
 
     def on_enter_receive_user_binary_response(self, event):
-        if self.is_answering(event):
-            chat_id = event.message.chat_id
-            telegram_user = TelegramUser.query.filter_by(id=chat_id).first()
-            sentence_binary = (
-                SentenceBinary.query
-                              .filter_by(created_by=telegram_user.id)
-                              .order_by(SentenceBinary.created_at.desc())
-                              .first()
-            )
-            sentence_binary.is_similar = (event.message.text == 'y')
-            db.session.add(sentence_binary)
-            db.session.commit()
+        callback_data = ujson.loads(event.callback_query.data)
 
-            self.continue_answering(event)
-        else:
-            self.quit_answering(event)
+        telegram_user = self.get_or_create_telegramuser(event.callback_query.from_user)
+
+        sentence_binary = SentenceBinary(
+            paraphrase_id=callback_data['pid'],
+            sentence_id=callback_data['sid'],
+            is_similar=callback_data['ans'],
+            created_by=telegram_user.id
+        )
+        db.session.add(sentence_binary)
+        db.session.commit()
+
+        self.send_thank_you_message(event)
+        self.continue_answering(event)
 
     def on_enter_wait_user_similarity_score(self, event):
-        telegram_user = self.get_or_create_telegramuser(event)
-
         sentence = Sentence.query.order_by(sqlalchemy.func.random()).first()
         paraphrase = Paraphrase.query.order_by(sqlalchemy.func.random()).first()
 
-        sentence_similarity = SentenceSimilairty(
-            paraphrase_id=paraphrase.id,
-            sentence_id=sentence.id,
-            created_by=telegram_user.id
-        )
-        db.session.add(sentence_similarity)
-        db.session.commit()
+        def create_callback_button(ans):
+            return ujson.dumps(
+                {
+                    'type': 'similarity',
+                    'sid': sentence.id,
+                    'pid': paraphrase.id,
+                    'ans': ans,
+                }
+            )
 
-        custom_keyboard = [
-            [KeyboardButton(text=str(num)) for num in range(1, 6)]
+        similarity_keyboard = [
+            [InlineKeyboardButton(text=str(num), callback_data=create_callback_button(num))
+             for num in range(1, 6)]
         ]
-        reply_markup = ReplyKeyboardMarkup(custom_keyboard)
+        reply_markup = InlineKeyboardMarkup(similarity_keyboard)
 
-        event.message.reply_text(
+        message = self.get_message_or_calbcak_query_message(event)
+        message.reply_text(
             self.render_text(
                 'ask_similarity.j2',
                 {
@@ -174,21 +208,21 @@ class LabelingMachine(BotGraphMachine):
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=reply_markup
         )
+        self.bot_finish_ans()
 
     def on_enter_receive_user_similarity_score(self, event):
-        if self.is_answering(event):
-            chat_id = event.message.chat_id
-            telegram_user = TelegramUser.query.filter_by(id=chat_id).first()
-            sentence_similarity = (
-                SentenceSimilairty.query
-                                  .filter_by(created_by=telegram_user.id)
-                                  .order_by(SentenceSimilairty.created_at.desc())
-                                  .first()
-            )
-            print(sentence_similarity.id)
-            sentence_similarity.score = int(event.message.text)
-            db.session.add(sentence_similarity)
-            print(sentence_similarity.id)
-            self.continue_answering(event)
-        else:
-            self.quit_answering(event)
+        callback_data = ujson.loads(event.callback_query.data)
+
+        telegram_user = self.get_or_create_telegramuser(event.callback_query.from_user)
+
+        sentence_similarity = SentenceSimilairty(
+            paraphrase_id=callback_data['pid'],
+            sentence_id=callback_data['sid'],
+            score=callback_data['ans'],
+            created_by=telegram_user.id
+        )
+        db.session.add(sentence_similarity)
+        db.session.commit()
+
+        self.send_thank_you_message(event)
+        self.continue_answering(event)

@@ -15,6 +15,7 @@ APP_STATIC_PATH = os.path.join(APP_ROOT_PATH, 'static')
 APP_TEMPLATE_PATH = os.path.join(APP_ROOT_PATH, 'templates')
 
 bot = None
+
 db = SQLAlchemy()
 bootstarp = Bootstrap()
 migrate = Migrate()
@@ -24,15 +25,20 @@ login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
 
 
-def create_app(config_name):
+def setup_bot(api_token, webhook_url):
     global bot
 
-    app = Flask(__name__)
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
+    bot = telegram.Bot(api_token)
+    bot.set_webhook(webhook_url)
 
-    bot = telegram.Bot(config[config_name].BOT_API_TOKEN)
-    bot.set_webhook(config[config_name].WEB_HOOK_URL)
+
+def create_app(config_name):
+    app = Flask(__name__)
+    current_config = config[config_name]
+    app.config.from_object(current_config)
+    current_config.init_app(app)
+
+    setup_bot(current_config.BOT_API_TOKEN, current_config.WEB_HOOK_URL)
 
     db.init_app(app)
     bootstarp.init_app(app)

@@ -18,7 +18,7 @@ BOT_TEMPLATE_PATH = os.path.join(APP_TEMPLATE_PATH, 'bot_templates')
 machine = None
 
 
-def init_machine():
+def _init_machine():
     global machine
 
     with open(BOT_CONFIG, 'r') as config_file:
@@ -34,7 +34,8 @@ def init_machine():
         template_path=BOT_TEMPLATE_PATH,
     )
 
-init_machine()
+
+_init_machine()
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -45,5 +46,7 @@ def index():
 @main.route('/reply', methods=['POST'])
 def reply():
     update = telegram.Update.de_json(request.get_json(force=True), bot)
+    print("Pre State: ", machine.state)
     machine.advance(update)
+    print("Post State: ", machine.state)
     return 'ok'
