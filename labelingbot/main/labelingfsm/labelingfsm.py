@@ -1,8 +1,7 @@
 import ujson
-from copy import deepcopy
 from flask_sqlalchemy import sqlalchemy
 from telegram import (
-    ParseMode, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+    ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 )
 
 from ... import db
@@ -12,8 +11,6 @@ from ...models import (
 )
 from .botfsm import BotGraphMachine
 from .botfsm.mixins import TelegramBotUpdateConditionMixin
-
-
 
 
 class LabelingMachine(BotGraphMachine, TelegramBotUpdateConditionMixin):

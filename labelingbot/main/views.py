@@ -17,7 +17,6 @@ BOT_TEMPLATE_PATH = os.path.join(APP_TEMPLATE_PATH, 'bot_templates')
 
 machine = None
 
-
 def _init_machine():
     global machine
 
@@ -36,7 +35,6 @@ def _init_machine():
 
 
 _init_machine()
-
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
